@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Application Tracker</title>
+  <style>
+    /* General styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color:#333;
+}
+
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+
+main {
+  display: flex;
+  justify-content: space-around;
+  margin: 2rem;
+}
+
+h1, h2 {
+  margin-bottom: 1rem;
+}
+
+/* Job Application Form */
+.job-form {
+  background-color: #fff;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.job-form input, 
+.job-form select, 
+.job-form textarea, 
+.job-form button {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.job-form button {
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Job Applications List */
+.job-list {
+  width: 60%;
+}
+
+#applicationsList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.application-item {
+  background-color: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.application-item h3 {
+  margin-top: 0;
+}
+
+.application-item button {
+  margin-right: 0.5rem;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Job Application Tracker</h1>
+  </header>
+
+  <main>
+    <!-- Job Application Form -->
+    <section class="job-form">
+      <h2>Add New Application</h2>
+      <form id="applicationForm">
+        <input type="text" id="company" placeholder="Company Name" required>
+        <input type="text" id="jobTitle" placeholder="Job Title" required>
+        <input type="date" id="applicationDate" required>
+        <select id="status" required>
+          <option value="Applied">Applied</option>
+          <option value="Interviewing">Interviewing</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <textarea id="notes" placeholder="Notes"></textarea>
+        <button type="submit">Add Application</button>
+      </form>
+    </section>
+
+    <!-- Job Applications List -->
+    <section class="job-list">
+      <h2>Applications</h2>
+      <ul id="applicationsList">
+        <!-- Applications will be dynamically generated here -->
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Select form and list elements
+const applicationForm = document.getElementById('applicationForm');
+const applicationsList = document.getElementById('applicationsList');
+
+// Get applications from LocalStorage or initialize empty array
+let applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
+
+// Function to display applications in the list
+function displayApplications() {
+  applicationsList.innerHTML = ''; // Clear the list
+  applications.forEach((app, index) => {
+    const applicationItem = document.createElement('li');
+    applicationItem.classList.add('application-item');
+    applicationItem.innerHTML = `
+      <h3>${app.company} - ${app.jobTitle}</h3>
+      <p><strong>Date Applied:</strong> ${app.applicationDate}</p>
+      <p><strong>Status:</strong> ${app.status}</p>
+      <p><strong>Notes:</strong> ${app.notes}</p>
+      <button onclick="editApplication(${index})">Edit</button>
+      <button onclick="deleteApplication(${index})">Delete</button>
+    `;
+    applicationsList.appendChild(applicationItem);
+  });
+}
+
+// Add event listener to the form
+applicationForm.addEventListener('submit', function (e) {
+  e.preventDefault(); // Prevent form submission
+
+  // Get values from the form
+  const company = document.getElementById('company').value;
+  const jobTitle = document.getElementById('jobTitle').value;
+  const applicationDate = document.getElementById('applicationDate').value;
+  const status = document.getElementById('status').value;
+  const notes = document.getElementById('notes').value;
+
+  // Create a new application object
+  const newApplication = {
+    company,
+    jobTitle,
+    applicationDate,
+    status,
+    notes
+  };
+
+  // Add the new application to the array
+  applications.push(newApplication);
+
+  // Save to LocalStorage
+  localStorage.setItem('jobApplications', JSON.stringify(applications));
+
+  // Clear the form
+  applicationForm.reset();
+
+  // Re-render the applications list
+  displayApplications();
+});
+
+// Display applications on page load
+displayApplications();
+// Function to delete an application
+function deleteApplication(index) {
+  applications.splice(index, 1); // Remove the selected application
+  localStorage.setItem('jobApplications', JSON.stringify(applications)); // Update LocalStorage
+  displayApplications(); // Re-render the list
+}
+// Function to edit an application
+function editApplication(index) {
+  const app = applications[index];
+
+  // Pre-fill the form with the existing data
+  document.getElementById('company').value = app.company;
+  document.getElementById('jobTitle').value = app.jobTitle;
+  document.getElementById('applicationDate').value = app.applicationDate;
+  document.getElementById('status').value = app.status;
+  document.getElementById('notes').value = app.notes;
+
+  // Remove the application being edited
+  applications.splice(index, 1);
+  localStorage.setItem('jobApplications', JSON.stringify(applications)); // Update LocalStorage
+  displayApplications(); // Re-render the list
+}
+
+  </script>
+</body>
+</html>
